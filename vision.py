@@ -1,6 +1,8 @@
+#!/usr/bin/python3
+
 import cv2
 import numpy as np
-
+import glob
 
 def process(input_path, output_path):
     img = cv2.imread(input_path)
@@ -24,7 +26,13 @@ def process(input_path, output_path):
             angle = np.arctan2(y2 - y1, x2 - x1) * 180. / np.pi
             if angle > 0 and angle < 10:
                 cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-
     cv2.imwrite(output_path, img)
+    print('Wrote to ', output_path, 'after process')
 
-process('input/normal/normal-1.jpg', 'houghlines3.jpg')
+root_dir = './data/input/normal'
+
+for input_file_path in glob.iglob(root_dir + '**/*.jpeg', recursive=True):
+    print('Input:', input_file_path)
+    output_file_path = input_file_path.replace('input', 'output')
+    process(input_file_path, output_file_path)
+    print('Output', output_file_path)
