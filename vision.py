@@ -8,6 +8,7 @@ import sys
 # from matplotlib import pyplot as plt
 
 def process(input_path):
+
     print('Input:', input_path)
     output_path = input_path.replace('input', 'output')
     mid_path = input_path.replace('input', 'mid')
@@ -16,16 +17,21 @@ def process(input_path):
     input_img = cv2.imread(input_path)
     output_img = input_img.copy()
     height, width, channels = input_img.shape
-    gray = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
+    linear_size = min(width, height)
 
-    edges = cv2.Canny(gray, 0, 3 * max(width, height), apertureSize=5)
+    kernel = np.ones((5, 5), np.float32) / 25
+    blur_img = cv2.filter2D(input_img, -1, kernel)
+    laplacian = cv2.Laplacian(blur_img, cv2.CV_64F)
+    laplacian_img = cv2.convertScaleAbs(laplacian)
+
+    edges = cv2.Canny(laplacian_img, 0, 3 * linear_size, apertureSize=5)
 
     lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
     if lines is not None:
 
         for line in lines:
             for rho, theta in line:
-                if (int(theta / np.pi * 100.0) + 2) % 50 <= 2:
+                if (int(theta / np.pi * 1000.0) + 2) % 500 <= 2:
                     a = np.cos(theta)
                     b = np.sin(theta)
                     x0 = a * rho
@@ -41,7 +47,7 @@ def process(input_path):
     print('Output:', output_path)
 
     mid_img= cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
-    full_img = np.concatenate([input_img, mid_img, output_img], axis=1)
+    full_img = np.concatenate([input_img, laplacian_img, mid_img, output_img], axis=1)
     cv2.imwrite(mid_path, full_img)
     print('Mid:', mid_path)
 
