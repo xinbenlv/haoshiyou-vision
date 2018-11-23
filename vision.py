@@ -26,8 +26,11 @@ def process(input_path, output_path):
                 x2 = int(x0 - 1000 * (-b))
                 y2 = int(y0 - 1000 * (a))
                 angle = np.arctan2(y2 - y1, x2 - x1) * 180. / np.pi
-                if 88 < angle or a < 2:
+                if 88 < abs(angle) or abs(angle) < 2:
                     cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    print('angle', angle)
+                else:
+                    print('===angle', angle)
     cv2.imwrite(output_path, img)
     print('Wrote to ', output_path, 'after process')
 
